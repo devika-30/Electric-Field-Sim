@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conductor vs Insulator Simulation</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <h1>Conductor vs Insulator in an Electric Field</h1>
+
+    <div class="toolbar">
+      <button id="fieldOn" class="active">Electric Field ON</button>
+      <button id="fieldOff">Electric Field OFF</button>
+      <button id="resetSim">Reset</button>
+
+      <div class="sliderWrap">
+        <label for="speedRange">Speed</label>
+        <input id="speedRange" type="range" min="0" max="100" value="60" />
+        <span id="speedValue">60</span>
+      </div>
+
+      <div class="sliderWrap">
+        <label for="fieldStrength">Field Strength</label>
+        <input id="fieldStrength" type="range" min="0" max="100" value="60" />
+        <span id="fieldStrengthValue">60</span>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i class="swatch electrons"></i> Green = electrons</span>
+      <span><i class="swatch dipole1"></i> Orange/Pink = dipoles</span>
+      <span><i class="swatch field"></i> Blue = electric field</span>
+    </div>
+
+    <div class="statusPanel">
+      <div>Field Strength: <span id="statusFieldStrength">60</span></div>
+      <div>Charge Separation: <span id="statusCharge">Active</span></div>
+      <div>Polarization: <span id="statusPolarization">Active</span></div>
+    </div>
+
+    <canvas id="simCanvas" width="1600" height="980"></canvas>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
