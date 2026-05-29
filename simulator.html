@@ -1,0 +1,1125 @@
+Paste this whole code into a new file in VS Code and save it as `conductor_insulator_virtual_lab.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conductor and Insulator Virtual Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --page: #eef4f8;
+    --surface: #ffffff;
+    --surface-2: #f7fafc;
+    --ink: #152331;
+    --muted: #607082;
+    --line: #d8e2ea;
+    --blue: #2477d4;
+    --blue-dark: #16559b;
+    --teal: #00a99d;
+    --green: #24a148;
+    --orange: #d96c1c;
+    --rose: #d43f72;
+    --amber: #e2a500;
+    --shadow: 0 18px 48px rgba(25, 45, 70, 0.14);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.78), rgba(238,244,248,0.96)),
+      radial-gradient(circle at 10% 10%, rgba(36,119,212,0.11), transparent 34%),
+      radial-gradient(circle at 90% 8%, rgba(0,169,157,0.10), transparent 32%);
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .wrapper {
+    width: min(1220px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 24px 0 36px;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 14px 18px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.84);
+    box-shadow: 0 10px 30px rgba(43, 72, 99, 0.08);
+    backdrop-filter: blur(12px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 21px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--blue), var(--teal));
+    box-shadow: 0 10px 24px rgba(36,119,212,0.24);
+  }
+
+  .eyebrow {
+    margin: 0 0 2px;
+    color: var(--blue-dark);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: clamp(21px, 2.4vw, 34px);
+    line-height: 1.05;
+    letter-spacing: 0;
+  }
+
+  .lab-status {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 5px rgba(36,161,72,0.14);
+  }
+
+  .control-panel {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  .controls, .readouts {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 10px 28px rgba(25, 45, 70, 0.08);
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .btn {
+    min-height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0 15px;
+    background: var(--surface);
+    color: var(--ink);
+    font: 800 13px/1 "Inter", sans-serif;
+    cursor: pointer;
+    transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+  }
+
+  .btn:hover { transform: translateY(-1px); border-color: #afbfcb; }
+  .btn.active, .btn-primary {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+  .btn-danger.active { background: #425466; border-color: #425466; color: #fff; }
+  .btn-green.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+  .slider-wrap {
+    display: grid;
+    grid-template-columns: auto minmax(150px, 260px) 42px;
+    align-items: center;
+    gap: 11px;
+    padding: 0 10px;
+    min-height: 42px;
+    border-left: 1px solid var(--line);
+  }
+
+  .slider-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .slider-val {
+    color: var(--blue-dark);
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: right;
+  }
+
+  input[type=range] {
+    width: 100%;
+    height: 5px;
+    appearance: none;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--blue) var(--pct, 50%), #d8e2ea var(--pct, 50%));
+    outline: none;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    background: var(--blue);
+    box-shadow: 0 2px 8px rgba(36,119,212,0.35);
+    cursor: pointer;
+  }
+
+  .readouts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(112px, 1fr));
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .metric {
+    padding: 11px 14px;
+    border-left: 1px solid var(--line);
+  }
+  .metric:first-child { border-left: 0; }
+  .metric-label {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .metric-value {
+    margin-top: 4px;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .sim-shell {
+    margin-top: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .sim-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+  }
+
+  .sim-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .sim-note {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .pill {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: #fff;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    background:
+      linear-gradient(rgba(36,119,212,0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(36,119,212,0.055) 1px, transparent 1px),
+      #fbfdff;
+    background-size: 34px 34px;
+  }
+
+  #simCanvas {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    align-items: center;
+    padding: 13px 16px 15px;
+    border-top: 1px solid var(--line);
+    background: #fff;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .legend-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.7);
+  }
+  .dot-electron { background: var(--green); }
+  .dot-negative { background: var(--orange); }
+  .dot-positive { background: var(--rose); }
+  .dot-field { background: var(--blue); }
+  .dot-surface { background: var(--amber); }
+
+  .learning-panel {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .concept {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 15px;
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 10px 28px rgba(25, 45, 70, 0.07);
+  }
+
+  .concept-kicker {
+    color: var(--blue-dark);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .formula {
+    margin: 7px 0 6px;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 21px;
+    font-weight: 700;
+  }
+
+  .concept p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.48;
+  }
+
+  @media (max-width: 900px) {
+    .control-panel { grid-template-columns: 1fr; }
+    .readouts { grid-template-columns: repeat(3, 1fr); }
+    .learning-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .slider-wrap { border-left: 0; width: 100%; }
+  }
+
+  @media (max-width: 640px) {
+    .wrapper { width: min(100% - 20px, 1220px); padding-top: 12px; }
+    .topbar, .sim-header { align-items: flex-start; flex-direction: column; }
+    .lab-status { white-space: normal; }
+    .controls { align-items: stretch; }
+    .btn { flex: 1 1 42%; }
+    .slider-wrap { grid-template-columns: 1fr; padding: 8px 0 0; }
+    .slider-val { text-align: left; }
+    .readouts, .learning-panel { grid-template-columns: 1fr; }
+    .metric { border-left: 0; border-top: 1px solid var(--line); }
+    .metric:first-child { border-top: 0; }
+  }
+</style>
+</head>
+<body>
+<main class="wrapper">
+  <section class="topbar" aria-label="Virtual lab header">
+    <div class="brand">
+      <div class="brand-mark">E</div>
+      <div>
+        <p class="eyebrow">Virtual Electrostatics Lab</p>
+        <h1>Conductor and Insulator in an Electric Field</h1>
+      </div>
+    </div>
+    <div class="lab-status"><span class="status-dot"></span><span id="statusText">Field standby</span></div>
+  </section>
+
+  <section class="control-panel" aria-label="Simulation controls">
+    <div class="controls">
+      <button class="btn btn-primary" id="btnOn">Field On</button>
+      <button class="btn btn-danger active" id="btnOff">Field Off</button>
+      <button class="btn btn-green" id="btnSlow">Slow Motion</button>
+      <button class="btn" id="btnReset">Reset Lab</button>
+      <div class="slider-wrap">
+        <span class="slider-label">Field strength</span>
+        <input type="range" id="fieldSlider" min="0" max="100" value="50" aria-label="Field strength">
+        <span class="slider-val" id="sliderVal">50</span>
+      </div>
+    </div>
+    <div class="readouts" aria-label="Live readouts">
+      <div class="metric">
+        <div class="metric-label">Field</div>
+        <div class="metric-value" id="dpField">50</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">e- shift</div>
+        <div class="metric-value" id="dpDisp">0.00</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Polarization</div>
+        <div class="metric-value" id="dpPol">0.000</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sim-shell">
+    <div class="sim-header">
+      <div>
+        <h2 class="sim-title">Live particle model</h2>
+        <p class="sim-note">Compare mobile charges in a conductor with bound dipoles in an insulator.</p>
+      </div>
+      <div class="pill-row">
+        <span class="pill" id="electronCount">34 electrons</span>
+        <span class="pill" id="dipoleCount">24 dipoles</span>
+        <span class="pill">No-overlap spacing</span>
+      </div>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="simCanvas"></canvas>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot dot-electron"></span>Free electrons</div>
+      <div class="legend-item"><span class="legend-dot dot-negative"></span>Dipole negative end</div>
+      <div class="legend-item"><span class="legend-dot dot-positive"></span>Dipole positive end</div>
+      <div class="legend-item"><span class="legend-dot dot-field"></span>Electric field</div>
+      <div class="legend-item"><span class="legend-dot dot-surface"></span>Surface charge</div>
+    </div>
+  </section>
+
+  <section class="learning-panel" aria-label="Physics notes">
+    <article class="concept">
+      <div class="concept-kicker">Electric field</div>
+      <div class="formula">E = F / q</div>
+      <p>Field strength is force per unit positive charge, measured in N/C or V/m.</p>
+    </article>
+    <article class="concept">
+      <div class="concept-kicker">Polarization</div>
+      <div class="formula">P = epsilon0 chi E</div>
+      <p>Bound charges shift slightly, so each dipole rotates toward the applied field.</p>
+    </article>
+    <article class="concept">
+      <div class="concept-kicker">Conductor</div>
+      <div class="formula">E_inside = 0</div>
+      <p>Mobile electrons redistribute until the internal electrostatic field is cancelled.</p>
+    </article>
+    <article class="concept">
+      <div class="concept-kicker">Insulator</div>
+      <div class="formula">p = qd</div>
+      <p>Charges remain bound, but dipole alignment increases as field strength rises.</p>
+    </article>
+  </section>
+</main>
+
+<script>
+const canvas = document.getElementById("simCanvas");
+const ctx = canvas.getContext("2d");
+
+let fieldOn = false;
+let slowMo = false;
+let fieldStr = 50;
+let time = 0;
+let lastTime = 0;
+let arrowPhase = 0;
+
+const NUM_ELECTRONS = 34;
+const NUM_DIPOLES = 24;
+const ELECTRON_GAP = 7;
+const SOLVER_ITERATIONS = 14;
+
+let electrons = [];
+let dipoles = [];
+
+function layout() {
+  const W = canvas.width;
+  const H = canvas.height;
+  const R = Math.min(W * 0.168, H * 0.34);
+  return {
+    W,
+    H,
+    R,
+    cCX: W * 0.28,
+    iCX: W * 0.72,
+    cY: H * 0.49
+  };
+}
+
+function resize() {
+  const width = Math.min(canvas.parentElement.clientWidth, 1220);
+  const height = Math.max(430, Math.round(width * 0.48));
+  canvas.width = width;
+  canvas.height = height;
+  canvas.style.height = height + "px";
+  initParticles();
+}
+
+function pointFits(x, y, radius, placed, minDistance) {
+  const { cCX, cY, R } = layout();
+  const dx = x - cCX;
+  const dy = y - cY;
+  if (Math.sqrt(dx * dx + dy * dy) > R * 0.76 - radius) return false;
+
+  return placed.every(p => {
+    const ddx = x - p.x;
+    const ddy = y - p.y;
+    return Math.sqrt(ddx * ddx + ddy * ddy) >= minDistance;
+  });
+}
+
+function initElectrons() {
+  const { cCX, cY, R } = layout();
+  electrons = [];
+
+  const radius = Math.max(3.1, Math.min(4.3, R * 0.034));
+  const minDistance = radius * 2 + ELECTRON_GAP;
+
+  const rings = [
+    { count: 1, r: 0 },
+    { count: 8, r: R * 0.22 },
+    { count: 11, r: R * 0.43 },
+    { count: 14, r: R * 0.63 }
+  ];
+
+  rings.forEach((ring, ringIndex) => {
+    for (let i = 0; i < ring.count && electrons.length < NUM_ELECTRONS; i++) {
+      const angle = ring.count === 1 ? 0 : (i / ring.count) * Math.PI * 2 + ringIndex * 0.31;
+      const wobble = ring.count === 1 ? 0 : Math.sin(i * 1.9 + ringIndex) * R * 0.018;
+      const x = cCX + Math.cos(angle) * (ring.r + wobble);
+      const y = cY + Math.sin(angle) * (ring.r + wobble);
+      const vAngle = angle + Math.PI / 2 + (Math.random() - 0.5) * 0.8;
+
+      electrons.push({
+        x,
+        y,
+        homeX: x,
+        homeY: y,
+        vx: Math.cos(vAngle) * (0.45 + Math.random() * 0.35),
+        vy: Math.sin(vAngle) * (0.45 + Math.random() * 0.35),
+        r: radius
+      });
+    }
+  });
+
+  let attempts = 0;
+  while (electrons.length < NUM_ELECTRONS && attempts < 1200) {
+    attempts++;
+    const a = Math.random() * Math.PI * 2;
+    const rr = Math.sqrt(Math.random()) * R * 0.7;
+    const x = cCX + Math.cos(a) * rr;
+    const y = cY + Math.sin(a) * rr;
+
+    if (!pointFits(x, y, radius, electrons, minDistance)) continue;
+
+    electrons.push({
+      x,
+      y,
+      homeX: x,
+      homeY: y,
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: (Math.random() - 0.5) * 0.8,
+      r: radius
+    });
+  }
+}
+
+function initDipoles() {
+  const { iCX, cY, R } = layout();
+  dipoles = [];
+
+  const cols = 6;
+  const rows = 5;
+  const xGap = R * 0.26;
+  const yGap = R * 0.24;
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const x = iCX + (col - (cols - 1) / 2) * xGap;
+      const y = cY + (row - (rows - 1) / 2) * yGap;
+      const dx = x - iCX;
+      const dy = y - cY;
+
+      if (Math.sqrt(dx * dx + dy * dy) > R * 0.72) continue;
+
+      dipoles.push({
+        cx: x,
+        cy: y,
+        angle: ((row + col) % 6) * Math.PI / 3 + 0.25,
+        targetAngle: Math.random() * Math.PI * 2,
+        len: R * 0.105,
+        phase: row * 0.9 + col * 0.45
+      });
+    }
+  }
+
+  document.getElementById("electronCount").textContent = electrons.length + " electrons";
+  document.getElementById("dipoleCount").textContent = dipoles.length + " dipoles";
+}
+
+function initParticles() {
+  initElectrons();
+  initDipoles();
+}
+
+function roundRect(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.lineTo(x + w - r, y);
+  c.quadraticCurveTo(x + w, y, x + w, y + r);
+  c.lineTo(x + w, y + h - r);
+  c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  c.lineTo(x + r, y + h);
+  c.quadraticCurveTo(x, y + h, x, y + h - r);
+  c.lineTo(x, y + r);
+  c.quadraticCurveTo(x, y, x + r, y);
+  c.closePath();
+}
+
+function drawArrow(x1, y1, x2, y2, color, alpha, width = 2) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  const ux = dx / len;
+  const uy = dy / len;
+  const head = width * 5.5;
+  const ex = x2 - ux * head;
+  const ey = y2 - uy * head;
+  const px = -uy;
+  const py = ux;
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineCap = "round";
+
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(ex, ey);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(ex + px * head * 0.45, ey + py * head * 0.45);
+  ctx.lineTo(ex - px * head * 0.45, ey - py * head * 0.45);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function updateElectrons(dt) {
+  const { cCX, cY, R } = layout();
+  const intensity = fieldOn ? fieldStr / 100 : 0;
+  const speed = (slowMo ? 0.42 : 1) * dt;
+  const maxR = R * 0.76;
+
+  electrons.forEach(e => {
+    const targetX = e.homeX - intensity * R * 0.18;
+    const targetY = e.homeY;
+
+    e.vx += (targetX - e.x) * 0.004 * speed;
+    e.vy += (targetY - e.y) * 0.004 * speed;
+
+    e.vx += Math.sin(time * 2.1 + e.homeX * 0.02) * 0.018 * speed;
+    e.vy += Math.cos(time * 1.9 + e.homeY * 0.02) * 0.018 * speed;
+
+    const maxSpeed = slowMo ? 0.58 : 1.14;
+    const spd = Math.sqrt(e.vx * e.vx + e.vy * e.vy);
+
+    if (spd > maxSpeed) {
+      e.vx = (e.vx / spd) * maxSpeed;
+      e.vy = (e.vy / spd) * maxSpeed;
+    }
+
+    e.x += e.vx * speed;
+    e.y += e.vy * speed;
+  });
+
+  for (let iter = 0; iter < SOLVER_ITERATIONS; iter++) {
+    for (let i = 0; i < electrons.length; i++) {
+      for (let j = i + 1; j < electrons.length; j++) {
+        const a = electrons[i];
+        const b = electrons[j];
+
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const minDist = a.r + b.r + ELECTRON_GAP;
+        const dsq = dx * dx + dy * dy;
+
+        if (dsq < minDist * minDist && dsq > 0.0001) {
+          const d = Math.sqrt(dsq);
+          const push = (minDist - d) * 0.5;
+          const nx = dx / d;
+          const ny = dy / d;
+
+          a.x += nx * push;
+          a.y += ny * push;
+          b.x -= nx * push;
+          b.y -= ny * push;
+        }
+      }
+    }
+
+    electrons.forEach(e => {
+      const dx = e.x - cCX;
+      const dy = e.y - cY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const limit = maxR - e.r;
+
+      if (dist > limit && dist > 0) {
+        e.x = cCX + (dx / dist) * limit;
+        e.y = cY + (dy / dist) * limit;
+
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const dot = e.vx * nx + e.vy * ny;
+
+        e.vx -= 1.75 * dot * nx;
+        e.vy -= 1.75 * dot * ny;
+      }
+    });
+  }
+}
+
+function updateDipoles(dt) {
+  const speed = (slowMo ? 0.42 : 1) * dt;
+
+  dipoles.forEach(d => {
+    d.targetAngle = fieldOn ? 0 : Math.sin(time * 0.32 + d.phase) * 0.65 + d.phase;
+
+    let diff = d.targetAngle - d.angle;
+
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+
+    d.angle += diff * 0.075 * speed;
+  });
+}
+
+function drawBackground() {
+  const { W, H } = layout();
+
+  ctx.clearRect(0, 0, W, H);
+
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, "#fbfdff");
+  bg.addColorStop(1, "#edf5fb");
+
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = "rgba(36, 119, 212, 0.09)";
+  ctx.lineWidth = 1;
+
+  for (let x = 0; x <= W; x += 34) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, H);
+    ctx.stroke();
+  }
+
+  for (let y = 0; y <= H; y += 34) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+  }
+}
+
+function drawFieldArrows() {
+  if (!fieldOn) return;
+
+  const { W, H } = layout();
+  const intensity = fieldStr / 100;
+  const arrowLen = W * (0.052 + intensity * 0.018);
+  const rows = 8;
+  const spacing = H / (rows + 1);
+
+  for (let row = 0; row < rows; row++) {
+    const y = spacing * (row + 1);
+
+    for (let col = -1; col < 9; col++) {
+      const stride = W / 6.4;
+      const phase = (arrowPhase + row * 0.08 + col * 0.13) % 1;
+      const x = col * stride + phase * stride - arrowLen;
+
+      if (x < -arrowLen || x > W + arrowLen) continue;
+
+      drawArrow(
+        x,
+        y,
+        x + arrowLen,
+        y,
+        "#2477d4",
+        0.2 + intensity * 0.52,
+        1.4 + intensity * 1.35
+      );
+    }
+  }
+}
+
+function drawSpecimen(cx, cy, R, fillA, fillB, border, label, note) {
+  ctx.save();
+  ctx.shadowColor = "rgba(33, 55, 78, 0.18)";
+  ctx.shadowBlur = 24;
+  ctx.fillStyle = "rgba(255,255,255,0.72)";
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 1.04, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  const fill = ctx.createRadialGradient(cx - R * 0.35, cy - R * 0.36, 0, cx, cy, R);
+  fill.addColorStop(0, fillA);
+  fill.addColorStop(1, fillB);
+
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = border;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = "#233447";
+  ctx.font = `700 ${Math.max(15, R * 0.13)}px Inter, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(label, cx, cy + R + 26);
+
+  ctx.fillStyle = "#607082";
+  ctx.font = `600 ${Math.max(11, R * 0.075)}px Inter, sans-serif`;
+  ctx.fillText(note, cx, cy + R + 45);
+}
+
+function drawConductor() {
+  const { cCX, cY, R } = layout();
+
+  drawSpecimen(
+    cCX,
+    cY,
+    R,
+    "#dff4ff",
+    "#9fd0ee",
+    "rgba(36,119,212,0.85)",
+    "CONDUCTOR",
+    "mobile charges redistribute"
+  );
+
+  electrons.forEach(e => {
+    ctx.save();
+
+    ctx.fillStyle = "rgba(36,161,72,0.12)";
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, e.r + 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    const grad = ctx.createRadialGradient(e.x - e.r * 0.35, e.y - e.r * 0.4, 0, e.x, e.y, e.r);
+    grad.addColorStop(0, "#d7ffe1");
+    grad.addColorStop(0.48, "#24a148");
+    grad.addColorStop(1, "#12722f");
+
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `800 ${Math.max(7, e.r * 1.45)}px Inter, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("-", e.x, e.y - 0.2);
+
+    ctx.restore();
+  });
+
+  if (fieldOn) {
+    const intensity = fieldStr / 100;
+
+    for (let i = 0; i < 12; i++) {
+      const a = -Math.PI / 2 + (i / 11) * Math.PI;
+      const px = cCX + Math.cos(a) * (R + 10);
+      const py = cY + Math.sin(a) * (R + 10);
+
+      ctx.fillStyle = `rgba(226,165,0,${0.48 + intensity * 0.5})`;
+      ctx.font = `800 ${12 + intensity * 6}px Inter, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("+", px, py);
+    }
+
+    const w = R * 0.86;
+    const h = 28;
+    const x = cCX - w / 2;
+    const y = cY + R * 0.44;
+
+    ctx.fillStyle = "rgba(255,255,255,0.82)";
+    ctx.strokeStyle = "rgba(36,119,212,0.35)";
+
+    roundRect(ctx, x, y, w, h, 7);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#16559b";
+    ctx.font = `800 ${Math.max(11, h * 0.42)}px Inter, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.fillText("E_inside = 0", cCX, y + h / 2);
+  }
+}
+
+function drawInsulator() {
+  const { iCX, cY, R } = layout();
+
+  drawSpecimen(
+    iCX,
+    cY,
+    R,
+    "#fff3dd",
+    "#f7c27a",
+    "rgba(217,108,28,0.86)",
+    "INSULATOR",
+    "bound dipoles rotate in place"
+  );
+
+  dipoles.forEach(d => {
+    const intensity = fieldOn ? fieldStr / 100 : 0;
+    const half = d.len * (1 + intensity * 0.16);
+    const cos = Math.cos(d.angle);
+    const sin = Math.sin(d.angle);
+
+    const nx = d.cx + cos * half;
+    const ny = d.cy + sin * half;
+    const px = d.cx - cos * half;
+    const py = d.cy - sin * half;
+    const dr = Math.max(4.2, d.len * 0.36);
+
+    ctx.strokeStyle = "rgba(91, 65, 38, 0.36)";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(nx, ny);
+    ctx.lineTo(px, py);
+    ctx.stroke();
+
+    ctx.fillStyle = "#d96c1c";
+    ctx.beginPath();
+    ctx.arc(nx, ny, dr, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#fff";
+    ctx.font = `800 ${Math.max(7, dr * 1.4)}px Inter, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("-", nx, ny - 0.2);
+
+    ctx.fillStyle = "#d43f72";
+    ctx.beginPath();
+    ctx.arc(px, py, dr, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#fff";
+    ctx.fillText("+", px, py - 0.2);
+  });
+
+  if (fieldOn) {
+    const pct = Math.round(fieldStr);
+    const w = R * 0.92;
+    const h = 28;
+    const x = iCX - w / 2;
+    const y = cY + R * 0.44;
+
+    ctx.fillStyle = "rgba(255,255,255,0.82)";
+    ctx.strokeStyle = "rgba(217,108,28,0.36)";
+
+    roundRect(ctx, x, y, w, h, 7);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#9b4612";
+    ctx.font = `800 ${Math.max(11, h * 0.42)}px Inter, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.fillText(`Polarized ${pct}%`, iCX, y + h / 2);
+  }
+}
+
+function drawLabels() {
+  const { W, H, R, cCX, iCX, cY } = layout();
+
+  ctx.save();
+
+  ctx.strokeStyle = "rgba(96,112,130,0.22)";
+  ctx.setLineDash([8, 8]);
+  ctx.beginPath();
+  ctx.moveTo(W / 2, cY - R * 1.12);
+  ctx.lineTo(W / 2, cY + R * 1.2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = "#425466";
+  ctx.font = "800 12px Inter, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("metallic sample", cCX, 30);
+  ctx.fillText("dielectric sample", iCX, 30);
+
+  if (!fieldOn) {
+    ctx.fillStyle = "rgba(66,84,102,0.82)";
+    ctx.font = "800 15px Inter, sans-serif";
+    ctx.fillText("Switch the field on to observe charge separation and dipole alignment", W / 2, H - 26);
+  }
+
+  ctx.restore();
+}
+
+function updateMetrics() {
+  const intensity = fieldOn ? fieldStr / 100 : 0;
+
+  document.getElementById("dpField").textContent = fieldStr;
+  document.getElementById("dpDisp").textContent = (intensity * 9.87).toFixed(2);
+  document.getElementById("dpPol").textContent = (intensity * intensity * 8.854).toFixed(3);
+  document.getElementById("statusText").textContent = fieldOn ? "Field active" : "Field standby";
+}
+
+function loop(ts) {
+  const dt = lastTime ? Math.min((ts - lastTime) / 16.67, 2.5) : 1;
+
+  lastTime = ts;
+  time += 0.016 * (slowMo ? 0.42 : 1);
+
+  arrowPhase = (
+    arrowPhase +
+    (fieldOn ? 0.0055 * (0.4 + fieldStr / 100) * (slowMo ? 0.42 : 1) : 0)
+  ) % 1;
+
+  updateElectrons(dt);
+  updateDipoles(dt);
+  drawBackground();
+  drawFieldArrows();
+  drawLabels();
+  drawConductor();
+  drawInsulator();
+  updateMetrics();
+
+  requestAnimationFrame(loop);
+}
+
+const btnOn = document.getElementById("btnOn");
+const btnOff = document.getElementById("btnOff");
+const btnSlow = document.getElementById("btnSlow");
+const btnReset = document.getElementById("btnReset");
+const slider = document.getElementById("fieldSlider");
+const sliderVal = document.getElementById("sliderVal");
+
+btnOn.addEventListener("click", () => {
+  fieldOn = true;
+  btnOn.classList.add("active");
+  btnOff.classList.remove("active");
+});
+
+btnOff.addEventListener("click", () => {
+  fieldOn = false;
+  btnOff.classList.add("active");
+  btnOn.classList.remove("active");
+});
+
+btnSlow.addEventListener("click", () => {
+  slowMo = !slowMo;
+  btnSlow.classList.toggle("active", slowMo);
+});
+
+btnReset.addEventListener("click", () => {
+  fieldOn = false;
+  slowMo = false;
+  fieldStr = 50;
+
+  slider.value = 50;
+  sliderVal.textContent = "50";
+  slider.style.setProperty("--pct", "50%");
+
+  btnOn.classList.remove("active");
+  btnOff.classList.add("active");
+  btnSlow.classList.remove("active");
+
+  initParticles();
+});
+
+slider.addEventListener("input", () => {
+  fieldStr = Number(slider.value);
+  sliderVal.textContent = fieldStr;
+  slider.style.setProperty("--pct", fieldStr + "%");
+});
+
+slider.style.setProperty("--pct", "50%");
+
+window.addEventListener("resize", resize);
+
+resize();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
+```
